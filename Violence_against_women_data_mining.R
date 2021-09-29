@@ -1,0 +1,459 @@
+
+# Install packages if not available already
+if (!require("car")) install.packages("car")
+if (!require("datasets")) install.packages("datasets")
+if (!require("ggplot2")) install.packages("ggplot2")
+if (!require("dplyr")) install.packages("dplyr")
+if (!require("tidyverse")) install.packages("tidyverse")
+if (!require("qqplotr")) install.packages("qqplotr")
+if (!require("ggfortify")) install.packages("ggfortify")
+if (!require("ggthemes")) install.packages("ggthemes")
+if (!require("hrbrthemes")) install.packages("hrbrthemes")
+if (!require("ISLR")) install.packages("ISLR")
+if (!require("caret")) install.packages("caret")
+if (!require("GGally")) install.packages("GGally")
+if (!require("knitr")) install.packages("knitr")
+if (!require("MASS")) install.packages("MASS")
+if (!require("ROCR")) install.packages("ROCR")
+if (!require("corrplot")) install.packages("corrplot")
+if (!require("ggridges")) install.packages("ggridges")
+if (!require("klaR")) install.packages("klaR")
+if (!require("psych")) install.packages("psych")
+if (!require("yaml")) install.packages("yaml")
+if (!require("cluster")) install.packages("cluster")
+if (!require("factoextra")) install.packages("factoextra")
+if (!require("reshape2")) install.packages("reshape2")
+if (!require("broom")) install.packages("broom")
+if (!require("aod")) install.packages("aod")
+if (!require("ggpubr")) install.packages("ggpubr")
+if (!require("gridExtra")) install.packages("gridExtra")
+if (!require("fpc")) install.packages("fpc")
+if (!require("readr")) install.packages("readr")
+if (!require("dendextend")) install.packages("dendextend")
+if (!require("tibble")) install.packages("tibble")
+if (!require("ggforce")) install.packages("ggforce")
+if (!require("FactoMineR")) install.packages("FactoMineR")
+
+# Loading relevant R packages
+library(car, warn.conflicts = F, quietly = T)
+library(datasets, warn.conflicts = F, quietly = T)
+library(ggplot2, warn.conflicts = F, quietly = T)
+library(MASS, warn.conflicts = F, quietly = T)
+library(dplyr, warn.conflicts = F, quietly = T)       # for piping
+library(tidyverse, warn.conflicts = F, quietly = T)
+library(qqplotr, warn.conflicts = F, quietly = T)     # for qq plots
+library(ggfortify, warn.conflicts = F, quietly = T)   # for visualisations
+library(ggthemes, warn.conflicts = F, quietly = T)    # for ggplot themes
+library(hrbrthemes, warn.conflicts = F, quietly = T)  # for ggplot background themes
+library(ISLR, warn.conflicts = F, quietly = T)        # for data
+library(caret, warn.conflicts = F, quietly = T)       # for splitting the data
+library(GGally, warn.conflicts = F, quietly = T)
+library(knitr, warn.conflicts = F, quietly = T)       # to add appendix in the end
+library(ROCR, warn.conflicts = F, quietly = T)
+library(corrplot, warn.conflicts = F, quietly = T)    # Correlation matrix
+library(ggridges, warn.conflicts = F, quietly = T)
+library(klaR, warn.conflicts = F, quietly = T)
+library(psych, warn.conflicts = F, quietly = T)       # Visualise
+library(yaml, warn.conflicts = F, quietly = T)
+library(cluster, warn.conflicts = F, quietly = T)
+library(factoextra, warn.conflicts = F, quietly = T)  # clustering visualization
+library(reshape2, warn.conflicts = F, quietly = T)    # reshaping data
+library(broom, warn.conflicts = F, quietly = T)
+library(aod, warn.conflicts = F, quietly = T)         # for wald test
+library(ggpubr, warn.conflicts = F, quietly = T)
+library(gridExtra, warn.conflicts = F, quietly = T)
+library(fpc, warn.conflicts = F, quietly = T)
+library(readr, warn.conflicts = F, quietly = T)
+library(dendextend, warn.conflicts = F, quietly = T) # for comparing dendrograms
+library(tibble, warn.conflicts = F, quietly = T)
+library(ggforce, warn.conflicts = F, quietly = T) # PCA graph
+library(FactoMineR, warn.conflicts = F, quietly = T) # PCA
+
+#-------------------------------#
+#          IMPORT DATA          #
+#-------------------------------#
+
+Below_poverty_line_population <- read.csv("D:/Dhru Folder/JCU - Master of Data science/MA5810 - Introduction to Data Mining/Assignment 3 - Capstone project/Import_data/Below_poverty_line_population.csv"
+                                          ,header = TRUE
+                                          ,sep=",")
+
+Education_health_expenditure <- read.csv("D:/Dhru Folder/JCU - Master of Data science/MA5810 - Introduction to Data Mining/Assignment 3 - Capstone project/Import_data/Education_health_expenditure.csv"
+                                         ,header = TRUE
+                                         ,sep=",")
+
+Literacy_rate <- read.csv("D:/Dhru Folder/JCU - Master of Data science/MA5810 - Introduction to Data Mining/Assignment 3 - Capstone project/Import_data/Literacy_rate.csv"
+                             ,header = TRUE
+                             ,sep=",")
+
+Sex_ratio <- read.csv("D:/Dhru Folder/JCU - Master of Data science/MA5810 - Introduction to Data Mining/Assignment 3 - Capstone project/Import_data/Sex_ratio.csv"
+                                ,header = TRUE
+                                ,sep=",")
+
+Gender_Inequality_Index <- read.csv("D:/Dhru Folder/JCU - Master of Data science/MA5810 - Introduction to Data Mining/Assignment 3 - Capstone project/Import_data/Gender_Inequality_Index.csv"
+                                    ,header = TRUE
+                                    ,sep=",")
+
+HDI <- read.csv("D:/Dhru Folder/JCU - Master of Data science/MA5810 - Introduction to Data Mining/Assignment 3 - Capstone project/Import_data/HDI.csv"
+                ,header = TRUE
+                ,sep=",")
+
+Unemployment_rate <- read.csv("D:/Dhru Folder/JCU - Master of Data science/MA5810 - Introduction to Data Mining/Assignment 3 - Capstone project/Import_data/Unemployment_rate.csv"
+                              ,header = TRUE
+                              ,sep=",")
+
+
+Violence_against_women <- read.csv("D:/Dhru Folder/JCU - Master of Data science/MA5810 - Introduction to Data Mining/Assignment 3 - Capstone project/Import_data/Violence_against_women.csv"
+                                   ,header = TRUE
+                                   ,sep=",")
+
+#---------------------------------------------------------#
+#  Data Transformation: Clean and transform as required   #
+#---------------------------------------------------------#
+
+#---------------------------
+# Transpose the data to join
+poverty_transpose     <- Below_poverty_line_population %>%
+    pivot_longer(-Country, names_to = "year", values_to = "poverty") %>%
+    transform(year_clean = substr(year,2,5))
+expenditure_transpose <- Education_health_expenditure %>%
+    pivot_longer(-Country, names_to = "year", values_to = "expenditure") %>%
+    transform(year_clean = substr(year,2,5))
+literacy_transpose  <- Literacy_rate %>%
+    pivot_longer(-Country, names_to = "year", values_to = "literacy") %>%
+    transform(year_clean = substr(year,2,5))
+sex_ratio_transpose     <- Sex_ratio %>%
+    pivot_longer(-Country, names_to = "year", values_to = "sex_ratio") %>%
+    transform(year_clean = substr(year,2,5))
+inequality_transpose  <- Gender_Inequality_Index %>%
+    pivot_longer(-Country, names_to = "year", values_to = "inequality") %>%
+    transform(year_clean = substr(year,2,5))
+HDI_transpose         <- HDI %>%
+    pivot_longer(-Country, names_to = "year", values_to = "HDI") %>%
+    transform(year_clean = substr(year,2,5))
+unemployment_transpose <- Unemployment_rate %>%
+    pivot_longer(-Country, names_to = "year", values_to = "unemployment") %>%
+    transform(year_clean = substr(year,2,5))
+violence_transpose    <- Violence_against_women %>%
+    pivot_longer(-Country, names_to = "year", values_to = "violence") %>%
+    transform(year_clean = substr(year,2,5))
+    # mutate(violence_flag = ifelse(is.na(violence), "Missing", "Reported"))
+
+# Creating year variable as numeric and dropping year_clean column
+poverty_transpose$year      <- as.numeric(poverty_transpose$year_clean,replace = T)
+poverty_transpose           <- subset(poverty_transpose, select = -c(year_clean, year)) #Drop column
+
+expenditure_transpose$year  <- as.numeric(expenditure_transpose$year_clean,replace = T)
+expenditure_transpose       <- subset(expenditure_transpose, select = -c(year_clean)) #Drop column3
+
+literacy_transpose$year     <- as.numeric(literacy_transpose$year_clean,replace = T)
+literacy_transpose          <- subset(literacy_transpose, select = -c(year_clean)) #Drop column
+
+sex_ratio_transpose$year    <- as.numeric(sex_ratio_transpose$year_clean,replace = T)
+sex_ratio_transpose         <- subset(sex_ratio_transpose, select = -c(year_clean)) #Drop column
+
+inequality_transpose$year   <- as.numeric(inequality_transpose$year_clean,replace = T)
+inequality_transpose        <- subset(inequality_transpose, select = -c(year_clean)) #Drop column
+
+HDI_transpose$year          <- as.numeric(HDI_transpose$year_clean,replace = T)
+HDI_transpose               <- subset(HDI_transpose, select = -c(year_clean)) #Drop column
+
+unemployment_transpose$year <- as.numeric(unemployment_transpose$year_clean,replace = T)
+unemployment_transpose      <- subset(unemployment_transpose, select = -c(year_clean)) #Drop column
+
+violence_transpose$year     <- as.numeric(violence_transpose$year_clean,replace = T)
+violence_transpose_new      <- subset(violence_transpose, select = -c(year_clean, year)) #Drop column
+
+# Creating a single table with data for HDI, deaths and affected -> cleaning the year to remove x
+full_data_x1 <-   left_join(HDI_transpose, violence_transpose_new, by=c("Country"="Country")) %>%
+    left_join(.,poverty_transpose,              by=c("Country"="Country")) %>%
+    left_join(.,expenditure_transpose,          by=c("year" = "year","Country"="Country")) %>%
+    left_join(.,literacy_transpose,           by=c("year" = "year","Country"="Country")) %>%
+    left_join(.,sex_ratio_transpose,              by=c("year" = "year","Country"="Country")) %>%
+    left_join(.,inequality_transpose,           by=c("year" = "year","Country"="Country")) %>%
+    left_join(.,unemployment_transpose,         by=c("year" = "year","Country"="Country"))
+
+
+full_data_x2 <- full_data_x1 %>%
+    group_by(Country) %>%
+    mutate(New_HDI          = ifelse(mean(HDI, na.rm = T)          < 0,NA,mean(HDI, na.rm = T)) ,
+           New_violence     = ifelse(mean(violence, na.rm = T)     < 0,NA,mean(violence, na.rm = T)),
+           New_poverty      = ifelse(mean(poverty, na.rm = T)      < 0,NA,mean(poverty, na.rm = T)),
+           New_expenditure  = ifelse(mean(expenditure, na.rm = T)  < 0,NA,mean(expenditure, na.rm = T)),
+           New_literacy     = ifelse(mean(literacy, na.rm = T)     < 0,NA,mean(literacy, na.rm = T)),
+           New_sex_ratio    = ifelse(mean(sex_ratio, na.rm = T)    < 0,NA,mean(sex_ratio, na.rm = T)),
+           New_inequality   = ifelse(mean(inequality, na.rm = T)   < 0,NA,mean(inequality, na.rm = T)),
+           New_unemployment = ifelse(mean(unemployment, na.rm = T) < 0,NA,mean(unemployment, na.rm = T)) )
+
+full_data_x3 <- full_data_x2 %>%
+    group_by(Country,year) %>%
+    dplyr::mutate(F_HDI          = ifelse(!is.na(HDI),         HDI,         ifelse(!is.na(New_HDI)         ,New_HDI,          NA)),
+                  F_violence     = ifelse(!is.na(violence),    violence,    ifelse(!is.na(New_violence)    ,New_violence,     NA)),
+                  F_poverty      = ifelse(!is.na(poverty),     poverty,     ifelse(!is.na(New_poverty)     ,New_poverty,      NA)),
+                  F_expenditure  = ifelse(!is.na(expenditure), expenditure, ifelse(!is.na(New_expenditure) ,New_expenditure,  NA)),
+                  F_literacy     = ifelse(!is.na(literacy),    literacy,    ifelse(!is.na(New_literacy)    ,New_literacy,     NA)),
+                  F_sex_ratio    = ifelse(!is.na(sex_ratio),   sex_ratio,   ifelse(!is.na(New_sex_ratio)   ,New_sex_ratio,    NA)),
+                  F_inequality   = ifelse(!is.na(inequality),  inequality,  ifelse(!is.na(New_inequality)  ,New_inequality,   NA)),
+                  F_unemployment = ifelse(!is.na(unemployment),unemployment,ifelse(!is.na(New_unemployment),New_unemployment, NA)),
+                  Decade_Band    = case_when(year >= 1990 & year <= 2009 ~ "1990 - 2009",
+                                             year >= 2010 & year <= 2019 ~ "2010 - 2019"),
+                  HDI_Band       = case_when(F_HDI <= 0.55  ~ "Under-Developed",
+                                             F_HDI  > 0.55  ~ "Developed") ) %>%
+    dplyr::select(Country,
+                  year,
+                  F_HDI,
+                  F_violence,
+                  F_poverty,
+                  F_expenditure,
+                  F_literacy,
+                  F_sex_ratio,
+                  F_inequality,
+                  F_unemployment,
+                  Decade_Band,
+                  HDI_Band)
+
+summary(full_data_x3)
+
+#--------------------------------------#
+# PCA % Clustering data - summarised
+#--------------------------------------#
+cluster_pca_df <- full_data_x3 %>%
+    group_by(Country) %>%
+    summarise(HDI = mean(F_HDI),
+              violence = mean(F_violence),
+              poverty = mean(F_poverty),
+              expenditure = mean(F_expenditure),
+              literacy = mean(F_literacy),
+              sex_ratio = mean(F_sex_ratio),
+              inequality = mean(F_inequality),
+              unemployment = mean(F_unemployment)) %>%
+    mutate(HDI_Band       = case_when(HDI <= 0.55  ~ "Under-Developed",
+                                      HDI  > 0.55  ~ "Developed")) %>%
+    dplyr::select(Country,
+                  HDI,
+                  violence,
+                  poverty,
+                  expenditure,
+                  literacy,
+                  sex_ratio,
+                  inequality,
+                  unemployment,
+                  HDI_Band)
+
+cluster_pca_df <- na.omit(cluster_pca_df)# listwise deletion of missing
+cluster_pca_df_nocountry <- data.frame(column_to_rownames(cluster_pca_df, var = "Country")) # made countries to be row names
+
+#--------------------------------------#
+# ALGORITHM 1: PCA  #
+#--------------------------------------#
+
+pca_df <- cluster_pca_df_nocountry
+
+pca_df$cluster <- as.factor(pca_df$HDI_Band)
+
+# Correlation Matrix to explore existing correlation
+M <- round(cor(pca_df[,1:8]), 2) # Create the correlation matrix
+corrplot(M,order="hclust", tl.cex = 0.90, method = 'square', type = 'lower', diag = FALSE) # Create corr plot
+
+# plot variables to understand the spread
+gg <- GGally::ggpairs(pca_df[,1:8])
+                      # , upper = "blank")
+gg
+
+pc <- prcomp(pca_df[ ,1:8], center = T, scale = T)
+summary(pc) # Get the summary of pca - first 3 components explain 70.55% of the variance, whereas
+# the second component explains the remaining 29.45%
+
+par(mfrow=c(1,2))
+# dimensionality can be reduced from 8 to 6 as 2 components have Eigenvalue > 1
+# that explains almost 90% of variance - while only "loosing" about 10% of variance
+screeplot(pc, type = "l", npcs = 8, main = "Screeplot of 8 PCs")
+abline(h = 1, col="red", lty=5)
+legend("topright", legend=c("Eigenvalue = 1"),
+       col=c("red"), lty=5, cex=0.6)
+
+cumpro <- cumsum(pc$sdev^2 / sum(pc$sdev^2))
+plot(cumpro[0:10], xlab = "PC #", ylab = "Amount of explained variance", main = "Cumulative variance plot")
+abline(v = 3, col="blue", lty=5)
+abline(h = 0.7224, col="blue", lty=5)
+legend("topleft", legend=c("Cut-off @ PC3"),
+       col=c("blue"), lty=5, cex=0.6)
+
+# Principal components + tree
+par(mfrow=c(1,1))
+fviz_pca_biplot(pc, geom.ind = "point", pointshape = 21,
+                pointsize = 2,
+                fill.ind = pca_df$HDI_Band,
+                col.ind = "black",
+                palette = "jco",
+                addEllipses = TRUE,
+                label = "var",
+                col.var = "black",
+                repel = TRUE,
+                legend.title = "HDI Band") +
+    ggtitle("PCA plot for 8 feature dataset") +
+    theme(plot.title = element_text(hjust = 0.5))
+
+# Change the color by groups, add ellipses
+fviz_pca_biplot(pc, label="var",
+                select.ind = list(contrib = 30),
+                col.ind = "black",
+                palette = "jco")+
+    ggtitle("Biplot of variables and 30 contributing observations") +
+    theme(plot.title = element_text(hjust = 0.5))
+
+
+#--------------------------------------#
+# ALGORITHM 2: HIERARCHIAL CLUSTERING  #
+#--------------------------------------#
+
+cluster_df_scaled <- scale(cluster_pca_df_nocountry[,1:8]) # standardize variables
+
+head(cluster_df_scaled, n=6)
+
+# For reproducibility
+set.seed(7789)
+
+# Get distance with default Euclidean (others possible)
+dMatrix <- dist(cluster_df_scaled, method="euclidean")
+# Visualise distance matrix
+fviz_dist(dMatrix, gradient = list(low = "#00AFBB",
+                                   mid = "white", high = "#2E9FDF"))
+
+# linking methods to test
+measure <- c( "average", "single", "complete", "ward")
+names(measure) <- c( "average", "single", "complete", "ward")
+# function to compute agglomerative coefficient
+ac <- function(x) {
+    agnes(cluster_df_scaled, method = x)$ac
+}
+#map function that transforms the input by applying a function
+#to each element of a list or atomic vector and returning
+#an object of the same
+map_dbl(measure, ac) # Ward's method identifies the strongest clustering structure of the four methods assessed.
+
+# Create clusters
+hc_agnes_ward <- agnes(cluster_df_scaled,metric = "euclidean", method = "ward")
+hc_agnes_ward$ac
+pltree(hc_agnes_ward, cex = 0.6, hang = -1,
+       main = "Dendrogram of Violence against women in countries using agnes & ward")
+
+# Cut in 2 groups and color by groups
+fviz_dend(hc_agnes_ward, k = 2, # Cut in four groups
+          cex = 0.5, # label size
+          #Colour choice
+          k_colors = c("#2E9FDF", "#FC4E07"),
+          color_labels_by_k = TRUE, # color labels by groups
+          rect = TRUE # Add rectangle around groups
+          )+
+    ggtitle("Dendrogram of violence against women per country using agnes & ward")
+
+# Ward's method
+hc_ward <- hclust(dMatrix, method = "ward.D2" )
+plot(hc_ward, cex = 0.6, main="Dendrogram of violence against women per country using ward")
+rect.hclust(hc_ward, k = 2, border = 2:5)
+
+# Elbow method
+p1<-fviz_nbclust(cluster_df_scaled, FUN = hcut, method = "wss")+
+    ggtitle("Elbow method")
+# Silhouette method
+p2<-fviz_nbclust(cluster_df_scaled, FUN = hcut, method = "silhouette")+
+    ggtitle("Silhouette method")
+
+p3<- fviz_gap_stat(clusGap(cluster_df_scaled, FUN = hcut, nstart = 25, K.max = 10, B = 50))+
+    ggtitle("Gap Statistics")
+
+# Display plots side by side
+gridExtra::grid.arrange(p1, p2, p3, nrow = 1)
+
+
+# Cut tree into 2 groups/clusters
+sub_grp <- cutree(hc_ward, k = 2)
+cluster_df_new <- cluster_pca_df_nocountry %>%
+                    mutate(cluster = sub_grp)
+
+cluster_df_new2 <- tibble::rownames_to_column(cluster_df_new, "Country")
+
+# Number of members in each cluster
+table(sub_grp)
+
+# Better interpretation of cluster
+fviz_cluster(list(data = cluster_df_scaled, cluster = sub_grp))+
+    theme_bw()
+
+as.matrix(table(as.factor(cluster_df_new2$HDI_Band),as.factor(cluster_df_new2$cluster)))
+
+#--------------------------------------#
+# ALGORITHM 3: Logistic regressiom     #
+#--------------------------------------#
+# Violence against women in developed and underdeveloped countries is equal
+
+# Test for correlation
+#**********************
+logistic_df <- na.omit(full_data_x3)# listwise deletion of missing# remove diagnosis for correlation matrix
+M <- round(cor(logistic_df[,3:10]), 2) # Create the correlation matrix
+
+# Remove highly correlated variables to improve model performance
+highlyCor <- colnames(M)[findCorrelation(M, cutoff = 0.9)]
+logistic_df <-logistic_df[, which(!colnames(logistic_df) %in% highlyCor)]
+
+corrplot(M,order="hclust", tl.cex = 0.90, method = 'square', type = 'lower', diag =  FALSE) # Create corr plot
+
+logistic_df_scaled <- data.frame(scale(logistic_df[,3:10])) # standardize variables
+
+new_df <- logistic_df %>%
+    dplyr::select(Country, year, HDI_Band, Decade_Band)
+
+logistic_df <- cbind(new_df[,3:4], logistic_df_scaled)
+
+logistic_df <- logistic_df %>% dplyr::select(-HDI_Band)
+# Test for distribution
+#***********************
+#Plot histograms of variables group by diagnosis - Is data normally distributed? (does not affect glm)
+# gg <- GGally::ggpairs(logistic_df[,4:12])
+# gg
+
+#split into training (80%) and test
+set.seed(7789)
+split <- createDataPartition(logistic_df$Decade_Band, p = 0.8, list = F)
+
+train <- logistic_df[split, ]
+test <- logistic_df[-split, ]
+
+c(nrow(train), nrow(test)) # print number of observations in test vs. train
+table(train$Decade_Band) %>% prop.table()*100 # Proportion (in %) by Diagnosis
+
+train$Decade_Band <- as.factor(train$Decade_Band)
+#Train the model to predict the likelihood of diagnosis
+model1 <- glm(Decade_Band ~ ., data = train, family = "binomial")
+summary(model1)
+
+# Make predictions on test data
+lodds_1  <- predict(model1, train, type = "link")#log odds
+probs_1  <- predict(model1, train, type = "response")#probabilities
+preds_1 <- ifelse(lodds_1 > 0,  "2010 - 2019", "1990 - 2009") #using log odds
+confusionMatrix(as.factor(preds_1), train$Decade_Band, positive = "2010 - 2019")
+
+## Make predictions on test data
+lodds_test_1  <- predict(model1, train, type = "link")#log odds
+probs_test_1  <- predict(model1, train, type = "response")#probabilities
+preds_test_1 <- ifelse(lodds_test_1 > 0,   "2010 - 2019", "1990 - 2009") #using log odds
+confusionMatrix(as.factor(preds_test_1), train$Decade_Band, positive = "2010 - 2019")
+
+# AUC on Test data
+print(paste("AUC for Test accuracy using logistic regression is: ",
+            prediction(probs_test_1, train$Decade_Band) %>%
+                performance(measure = "auc") %>%
+                .@y.values
+))
+# ROC on test data
+prediction(probs_test_1, train$Decade_Band) %>%
+    performance(measure = "tpr", x.measure = "fpr") %>%
+    plot(main = "ROC for Test data")
+#----------------------------
+
+
+
+
+
+
+
